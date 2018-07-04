@@ -9,6 +9,7 @@ import errorMiddleWare from '../lib/middleware/error-middleware';
 import loggerMiddleWare from '../lib/middleware/logger-middleware';
 
 import authRouter from '../router/auth-router';
+import profileRouter from '../router/profile-router';
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -20,6 +21,7 @@ app.use(express.json());
 
 app.use(loggerMiddleWare);
 app.use(authRouter);
+app.use(profileRouter);
 
 app.all('*', (request, response) => {
   console.log('Returning a 404 from the catch/all route');
