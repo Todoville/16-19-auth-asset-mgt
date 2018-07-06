@@ -4,7 +4,7 @@ import Account from '../../model/account';
 const createAccountMockPromise = () => {
   const mockData = {};
   const originalRequest = {
-    username: faker.internet.username(),
+    username: faker.internet.userName(),
     email: faker.internet.email(),
     password: faker.lorem.words(5),
   };

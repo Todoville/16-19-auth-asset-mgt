@@ -8,7 +8,7 @@ import logger from '../lib/logger';
 
 const authRouter = new Router();
 
-authRouter.post('api/signup', (request, response, next) => {
+authRouter.post('/api/signup', (request, response, next) => {
   return Account.create(request.body.username, request.body.email, request.body.password)
     .then((account) => {
       delete request.body.password;
@@ -16,7 +16,8 @@ authRouter.post('api/signup', (request, response, next) => {
       return account.createTokenPromise();
     })
     .then((token) => {
-      logger.log(logger.INFO, `AUTH-ROUTER /api/signup: returning a 200 code ad a token ${token}`);
+      logger.log(logger.INFO, `AUTH-ROUTER /api/signup: returning a 200 code and a token ${token}`);
+      return response.json({ token });
     })
     .catch(next);
 });
