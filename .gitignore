@@ -211,6 +211,6 @@ $RECYCLE.BIN/
 
 # Windows shortcuts
 *.lnk
-
+*.env
 
 # End of https://www.gitignore.io/api/vim,node,macos,linux,windows,webstorm,visualstudiocode

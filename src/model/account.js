@@ -2,10 +2,11 @@
 
 import mongoose from 'mongoose';
 import bcrypt from 'bcrypt';
-
 import crypto from 'crypto';
 import jsonWebToken from 'jsonwebtoken';
 import HttpErrors from 'http-errors';
+
+require('dotenv').config();
 
 const HASH_ROUNDS = 8;
 const TOKEN_SEED_LENGTH = 64;
