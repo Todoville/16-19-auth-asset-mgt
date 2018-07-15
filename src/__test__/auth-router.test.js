@@ -1,6 +1,6 @@
 import superagent from 'superagent';
 import faker from 'faker';
-import { startServer, stopServer } from '../lib/server';
+import { startServer, stopServer } from '../lib/server'; /*eslint-disable-line*/
 import { createAccountMockPromise, removeAccountMockPromise } from './lib/account-mock';
 
 // jest.setTimeout(20000);
