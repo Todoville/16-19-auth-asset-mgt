@@ -42,7 +42,11 @@ accountSchema.methods.verifyPasswordPromise = function verifyPasswordPromise(pas
       return this;
     })
     .catch((err) => {
-      throw new HttpErrors(500, `ERROR CREATING TOKEN: ${JSON.stringify(err)}`);
+      if (err.status === 401) {
+        throw err;
+      } else {
+        throw new HttpErrors(500, `ERROR CREATING TOKEN: ${JSON.stringify(err)}`);
+      }
     });
 };
 
@@ -53,7 +57,7 @@ accountSchema.methods.createTokenPromise = function createTokenPromise() {
       return jsonWebToken.sign({ tokenSeed: updatedAccount.tokenSeed }, process.env.SECRET_KEY);
     })
     .catch((err) => {
-      throw new HttpErrors(500, `ERROR SAVING ACCOUNT or ERROR WITH JWT: ${JSON.stringify(err)}`);
+      throw new HttpErrors(500, `ERROR CREATING TOKEN: ${JSON.stringify(err)}`);
     });
 };
 
@@ -62,6 +66,8 @@ const skipInit = process.env.NODE_ENV === 'development';
 const Account = mongoose.model('accounts', accountSchema, 'accounts', skipInit);
 
 Account.create = (username, email, password) => {
+  if (!username || !email || !password) throw new HttpErrors(400, 'ERROR: REQUIRED FIELD NOT SUBMITTED');
+
   return bcrypt.hash(password, HASH_ROUNDS)
     .then((passwordHash) => {
       password = null; /* eslint-disable-line */
@@ -74,7 +80,7 @@ Account.create = (username, email, password) => {
       }).save();
     })
     .catch((err) => {
-      throw new HttpErrors(500, `ERROR WITH HASHING or ERR WITH SAVING ACCOUNT: ${JSON.stringify(err)}`);
+      throw err;
     });
 };
 
