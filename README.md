@@ -1,63 +1,51 @@
-![cf](https://i.imgur.com/7v5ASc8.png) Lab 16: Basic Authentication
-======
+![cf](http://i.imgur.com/7v5ASc8.png) 16: Basic Authentication
+===
 
-## Submission Instructions
-* Work in a fork of this repository
-* Work in a branch on your fork called `lab-<current lab number>`
-* Set up Travis on your forked repo
-* **Deploy to Heroku**
-* Open a pull request to this repository
-* Submit on canvas 
-  * a question and observation
-  * your original estimate
-  * how long you spent, 
-  * a link to your pull request (**You will get a 0 if you have a failing PR or haven't hooked up Travis CI**)
-  * a link to your deployed Heroku URL (**You will get a 0 if you don't submit this**)
+## Learning Objectives
+* Students will learn about cryptographic hash and cypher algorithms
+* Students will be able to model a User and safely store their sensitive data
+* Students will be able to implement a Basic Authorization parser
 
 ## Resources
-* [express docs](http://expressjs.com/en/4x/api.html)
-* [mongoose guide](http://mongoosejs.com/docs/guide.html)
-* [mongoose api docs](http://mongoosejs.com/docs/api.html)
+* Read [basic auth](https://en.wikipedia.org/wiki/Basic_access_authentication)
 
-### Configuration
-Configure the root of your repository with the following files and directories. Thoughtfully name and organize any additional configuration or module files.
-* **README.md** - contains documentation
-* **.env** - contains env variables **(should be git ignored)**
-* **.gitignore** - contains a [robust](http://gitignore.io) `.gitignore` file
-* **.eslintrc.json** - contains the course linter configuration
-* **.eslintignore** - contains the course linter ignore configuration
-* **package.json** - contains npm package config
-  * create a `test` script for running tests
-  * create `dbon` and `dboff` scripts for managing the mongo daemon
-* **db/** - contains mongodb files **(should be git ignored)**
-* **index.js** - entry-point of the application
-* **src/** - contains the remaining code
-  * **src/lib/** - contains module definitions
-  * **src/model/** - contains module definitions
-  * **src/route/** - contains module definitions
-  * **src/\_\_test\_\_/** - contains test modules
-  * **main.js** - starts the server
+## Outline
 
-## Feature Tasks  
-For this assignment you will be building a RESTful HTTP server with basic authentication using express.
+### User Modeling
+Modern web applications need to model sensitive information about their users. When a users provides an applications with sensitive information, they are trusting that it will not be leaked are misused. This means that it is a developers responsibility to store that information responsibly. Some information, like emails, usernames, and addresses can be stored in plain text, as long as the database is password protected and/or behind a firewall. Other information, like a users password, should be encrypted using a hashing algorithm before it is ever stored. this prevents anyone (including developers with database permissions) from ever getting access to their password.  
 
-#### Account
-Create a user `Account` model that keeps track of a username, email, hashed password, and token seed. The model should be able to regenerate tokens using json web token. 
+User models that have sensitive data that should **NEVER** be sent to client applications. If your application requires that users be able to read each others personal information, create a second Profile model to hold that data and strictly limit access to the Profile model. Safely using a second model will ensure that no users will accidentally (or maliciously) get access to sensitive information.
 
-#### Server Endpoints
-* `POST /signup` 
-  * pass data as stringifed JSON in the body of a **POST** request to create a new account
-  * on success respond with a 200 status code and an authentication token
-  * on failure due to a bad request send a 400 status code
+### Cryptography
+Cryptograhpy is the science which studies methods for encoding messages so that they can be read only by a person who knows the secret information required for decoding, called the key; it includes cryptanalysis, the science of decoding encrypted messages without possessing the proper key, and has several other branches.  
 
-## Tests
-* POST should test for 200, 400, and 409 (if any keys are unique)
+\- [GNU Collaborative International Dictionary of English](http://gcide.gnu.org.ua)
 
-## Stretch Goal
-* Create a **very rudimentary** front end using jQuery/vanilla Javascript to make a request to your API to authenticate yourself as a user. You can start by making a signup form that has username/password/email input fields. Upon form submission, send those fields to your server via a front end AJAX request, and send a response back to display to your front end that confirms you successfully signed up. 
-* **This is a heavy stretch goal and should be prioritized last. The instructional team will not assist you with this goal**. 
+### Hash Algorithms
+A Cryptographic Hash Algorithm takes a piece of data and produces a hash that is deliberately difficult to reverse. If identical data is passed into the algorithm the same hash will always be produced. Hash algorithms are often used for checking the integrity of data.
 
-## Documentation
-Add your Travis badge to the top of your README. List all of your registered routes and describe their behavior. Describe what your resouce is. Imagine you are providing this API to other developers who need to research your API in order to use it. Describe how a developer should be able to make requests to your API. Refer to the PokeAPI docs for a good example to follow.
+In a User model, a hash password can be stored when the user signs up. When the user needs to login, they can resend their password and the server can hash the login password using the same hash algorithm. The server can then compare the hashed login password with previously stored hashed password to determine if the user should be authenticated.
 
+### Cypher Algorithms
+A Cryptographic Cypher Algorithm takes a piece of data and a key and produces encrypted data. Later the encrypted data can be reversed into the original data by decrypting it using the same key.
 
+User tokens can be created by associated a random unique string (tokenSeed) with a user account and, in turn, encrypting the tokenSeed with a secret key that only the server knows. We can then send the encrypted token to a client application. When the client makes a future request they send back the token. The server can reverse the token into the tokenSeed by decrypting it with the secret key. This is because the tokenSeed was unique to the database and can be queried to produce the user who made the request.
+
+### Basic Authorization
+Basic Authorization is a common method used to send a username and password in an HTTP request. The username and password are joined with a ':' then base64 encoded and placed after the string 'Basic '. The resulting string is set to the value of an Authorization header.
+
+A Server can decode the Basic Authorization header to retrieve the username and password. Its important to note that base64 encoding is not a form of encryption. The client and server must use HTTPS to protect the username and password as it travels across the network.
+
+``` javascript
+let encoded = window.btoa('slugbyte:secretpassword')
+// c2x1Z2J5dGU6c2VjcmV0cGFzc3dvcmQ=
+
+request({
+  method: 'GET',
+  url: 'https://api.example.com/login',
+  headers: {
+    Authorization: `Basic ${encoded}`,
+  },
+})
+.then(handleLogin)
+.catch(handleLoginError)t
