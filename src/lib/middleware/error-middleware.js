@@ -2,7 +2,7 @@
 
 import logger from '../logger';
 
-export default (error, request, response, next) => {
+export default (error, request, response) => {
   logger.log(logger.ERROR, `ERROR MIDDLEWARE: ${JSON.stringify(error)}`);
 
   if (error.status) {
@@ -23,8 +23,8 @@ export default (error, request, response, next) => {
   }
 
   if (errorMessage.includes('duplicate key')) {
-    logger.log(logger.ERROR, `Responding with a 400 code ${errorMessage}`);
-    return response.sendStatus(400);
+    logger.log(logger.ERROR, `Responding with a 409 code ${errorMessage}`);
+    return response.sendStatus(409);
   }
 
   if (errorMessage.includes('unauthorized')) {
